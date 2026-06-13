@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>From Strategy to Mechanism — A Reasoned Path to a Filecoin Area-4 Proposal</title>
+<meta name="description" content="The full reasoning, from Filecoin's 2026 strategy down to a concrete FIL value-accrual mechanism. Evidence-based, skeptical, step by step." />
+<style>
+  :root{
+    --bg:#ffffff; --bg-alt:#f5f8fc; --ink:#16202e; --muted:#5b6b80;
+    --line:#e3eaf3; --accent:#0a84ff; --accent-dk:#0060c0;
+    --warn:#b4690e; --warn-bg:#fff6e8; --good:#0a7d4f; --good-bg:#eafaf2;
+    --code-bg:#0f1722; --code-ink:#cfe3ff;
+    --maxw:780px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink);background:var(--bg);line-height:1.65;font-size:17px;-webkit-font-smoothing:antialiased}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  /* hero */
+  .hero{background:linear-gradient(160deg,#0b1b33 0%,#0f2a52 55%,#0a84ff 160%);color:#eaf2ff;padding:84px 24px 64px}
+  .hero-inner{max-width:var(--maxw);margin:0 auto}
+  .eyebrow{letter-spacing:.14em;text-transform:uppercase;font-size:12px;color:#8fb6ee;font-weight:700;margin-bottom:18px}
+  .hero h1{font-size:38px;line-height:1.15;margin:0 0 18px;font-weight:800;letter-spacing:-.02em}
+  .hero p.lede{font-size:19px;color:#cfe0fb;margin:0 0 26px}
+  .hero .meta{font-size:13px;color:#8fb6ee;border-top:1px solid rgba(255,255,255,.15);padding-top:18px;margin-top:8px}
+  /* layout */
+  .wrap{max-width:1120px;margin:0 auto;display:grid;grid-template-columns:240px 1fr;gap:48px;padding:0 24px}
+  nav.toc{position:sticky;top:0;align-self:start;max-height:100vh;overflow:auto;padding:40px 0 40px;font-size:13.5px}
+  nav.toc ol{list-style:none;margin:0;padding:0;counter-reset:s}
+  nav.toc a{display:block;color:var(--muted);padding:5px 10px;border-left:2px solid transparent;line-height:1.35}
+  nav.toc a:hover{color:var(--ink);text-decoration:none}
+  nav.toc a.part{font-weight:700;color:var(--ink);margin-top:14px}
+  main{min-width:0;padding:40px 0 80px}
+  section{margin:0 0 16px;padding:24px 0;border-top:1px solid var(--line)}
+  section:first-of-type{border-top:none}
+  .parttag{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:700}
+  h2{font-size:27px;line-height:1.2;margin:6px 0 14px;letter-spacing:-.015em;font-weight:800}
+  h3{font-size:19px;margin:26px 0 8px;font-weight:700}
+  p{margin:0 0 14px}
+  .muted{color:var(--muted)}
+  strong{font-weight:700}
+  /* callouts */
+  .box{border-radius:10px;padding:16px 18px;margin:18px 0;font-size:15.5px}
+  .key{background:var(--bg-alt);border:1px solid var(--line);border-left:4px solid var(--accent)}
+  .verdict{background:#0f1722;color:#e8f1ff;border-left:4px solid var(--accent)}
+  .verdict b{color:#7db8ff}
+  .warn{background:var(--warn-bg);border:1px solid #f0dcb8;border-left:4px solid var(--warn)}
+  .good{background:var(--good-bg);border:1px solid #c4ecd6;border-left:4px solid var(--good)}
+  .box p:last-child{margin-bottom:0}
+  .label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--accent);display:block;margin-bottom:6px}
+  .warn .label{color:var(--warn)} .good .label{color:var(--good)} .verdict .label{color:#7db8ff}
+  /* stats */
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin:20px 0}
+  .stat{background:var(--bg-alt);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+  .stat .n{font-size:26px;font-weight:800;color:var(--accent-dk);letter-spacing:-.02em;line-height:1.1}
+  .stat .l{font-size:12.5px;color:var(--muted);margin-top:4px}
+  /* diagrams */
+  .diagram{background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:18px;overflow-x:auto;
+    font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.5;margin:18px 0}
+  .diagram pre{margin:0;white-space:pre}
+  /* tables */
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14.5px}
+  th,td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:700;background:var(--bg-alt)}
+  td code{background:var(--bg-alt);padding:1px 5px;border-radius:4px;font-size:13px}
+  .tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px}
+  .t-exist{background:#eafaf2;color:var(--good)} .t-open{background:#e7f0ff;color:var(--accent-dk)} .t-hard{background:var(--warn-bg);color:var(--warn)}
+  ul.tight{margin:8px 0 14px;padding-left:22px} ul.tight li{margin:4px 0}
+  .footer{border-top:1px solid var(--line);padding:30px 24px 60px;max-width:var(--maxw);margin:0 auto;color:var(--muted);font-size:13.5px}
+  .pill{display:inline-block;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#cfe0fb;
+    font-size:12px;padding:3px 10px;border-radius:20px;margin:0 6px 6px 0}
+  @media(max-width:920px){
+    .wrap{grid-template-columns:1fr;gap:0}
+    nav.toc{display:none}
+    .hero h1{font-size:30px}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <div class="eyebrow">Filecoin · ProPGF Batch 3 · Area 4 — FIL Value Accrual</div>
+    <h1>From Strategy to Mechanism</h1>
+    <p class="lede">A reasoned, evidence-based path — from Filecoin's 2026 network strategy down to a concrete mechanism for routing paid demand into FIL value. Built step by step, skeptically, with the numbers shown.</p>
+    <div>
+      <span class="pill">Strategy → Tactics</span>
+      <span class="pill">15 research notes</span>
+      <span class="pill">Source-verified</span>
+      <span class="pill">Prepared by Protofire</span>
+    </div>
+    <div class="meta">Working document · 2026 · The reasoning behind the <b>FIL Value Engine</b> proposal. Figures illustrative / sourced as noted; not investment advice.</div>
+  </div>
+</header>
+
+<div class="wrap">
+  <nav class="toc">
+    <ol>
+      <li><a class="part" href="#method">How to read this</a></li>
+      <li><a class="part" href="#p1">I · The 2026 strategy</a></li>
+      <li><a class="part" href="#p2">II · Why those objectives</a></li>
+      <li><a class="part" href="#p3">III · Place vs hyperscalers</a></li>
+      <li><a class="part" href="#p4">IV · The wedges, tested</a></li>
+      <li><a class="part" href="#p5">V · Critique & CEO reframe</a></li>
+      <li><a class="part" href="#p6">VI · Does demand reach FIL?</a></li>
+      <li><a class="part" href="#p7">VII · The program decoded</a></li>
+      <li><a class="part" href="#p8">VIII · How payments work</a></li>
+      <li><a class="part" href="#p9">IX · A worked example</a></li>
+      <li><a class="part" href="#p10">X · The design</a></li>
+      <li><a class="part" href="#p11">XI · The economic model</a></li>
+      <li><a class="part" href="#p12">XII · The proposal</a></li>
+      <li><a class="part" href="#conclusion">Through-line</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+  <section id="method">
+    <span class="parttag">Method</span>
+    <h2>How to read this</h2>
+    <p>This document is the argument, not a pitch. We descended a ladder — from the strategic to the tactical — and refused to skip a rung. Every claim is grounded in primary sources (Filecoin spec, FIPs, the Filecoin Pay source code, market data) and held to one standard: <em>be skeptical first</em>. Where the popular narrative was hype, we said so; where Filecoin's own pitch overclaimed, we flagged it.</p>
+    <p>The path: understand the 2026 strategy → test whether its objectives are <em>right</em> against the real state of the ecosystem → locate Filecoin's defensible place in the data-infrastructure market → pressure-test the fashionable wedges (AI provenance, RWA) → re-derive the objectives as a turnaround CEO would → isolate the one existential question (does paid demand reach FIL?) → decode the grant program → learn exactly how the payment machinery works → and only then design a mechanism and model its economics.</p>
+    <div class="box key"><span class="label">The thesis in one line</span>
+      Filecoin's survival hinges on converting paid demand into FIL value — and today it doesn't. The mechanism that fixes this is not a token sink but a <b>funded SLA-insurance market</b> whose premiums burn FIL and pay FIL stakers who underwrite service quality.</div>
+  </section>
+
+  <section id="p1">
+    <span class="parttag">Part I</span>
+    <h2>The 2026 strategy: away from supply, toward paid demand</h2>
+    <p>Filecoin's official 2026 strategy is an explicit pivot — <em>"away from growing supply and towards scaling demand."</em> Three pillars: <b>(1) drive paid, on-chain deals; (2) strengthen network profitability & cryptoeconomics; (3) scale paid, flagship client adoption.</b> The repeated phrase is <em>"paid, onchain."</em> The token-economics line is the tell: <em>"the final network vesting periods will end… redirect network rewards towards paid usage."</em></p>
+    <div class="box key"><span class="label">Notable</span>The strategy never mentions "burn/lock." It talks about <b>redirecting rewards toward paid usage</b> — yet the RFP places us in "Area 4: Burn & Lock." Reconciling that tension became a thread we pull throughout.</div>
+  </section>
+
+  <section id="p2">
+    <span class="parttag">Part II</span>
+    <h2>Why those objectives? The ecosystem reality forced them</h2>
+    <p>The objectives aren't aspirational — they're a response to a structural crisis. The data:</p>
+    <div class="stats">
+      <div class="stat"><div class="n">17→3 EiB</div><div class="l">Committed capacity, 2022 peak → Q3-2025 (−82%)</div></div>
+      <div class="stat"><div class="n">~1.5%</div><div class="l">Of network power that is genuinely <em>paid</em> demand</div></div>
+      <div class="stat"><div class="n">99.5%</div><div class="l">Of network "fees" that were penalties — not client revenue</div></div>
+      <div class="stat"><div class="n">~Oct 2026</div><div class="l">Final FIL vesting ends — the inflation subsidy stops</div></div>
+      <div class="stat"><div class="n">−50% YoY</div><div class="l">SP revenue; committed capacity unprofitable 12+ months</div></div>
+      <div class="stat"><div class="n">~99%</div><div class="l">FIL below its 2021 ATH</div></div>
+    </div>
+    <p>Filecoin optimized <em>supply</em> so well it built ~17 EiB against a market that, stripped of the FIL+ subsidy (a 10× reward multiplier), pays for a low-single-digit slice. Utilization "rose" to 36% mostly because capacity shrank faster than data left. Meanwhile the two subsidies that kept storage providers alive — <b>linear vesting</b> and <b>block-reward minting</b> — are both ending/decaying at once.</p>
+    <div class="diagram"><pre>Supply over-built ─┐
+(17 EiB, paid≈1.5%)│
+                   ├─▶ SP economics break ─▶ "redirect rewards    ─▶ the 3 strategy pillars
+Vesting cliff     ─┤   (rev −50% YoY,         toward paid usage" +
+(~Oct 2026) +      │    CC unprofitable)       productize demand
+emission decay    ─┘                          (Onchain Cloud)
+                                AI demand = the timing bet</pre></div>
+    <div class="box verdict"><span class="label">Verdict</span>The vesting cliff and emission decay are not side-effects — they're the <b>forcing function</b>. They convert Filecoin from an inflation-subsidized capacity network into one that must be justified by <b>real paid revenue</b>. AI is the bet that this conversion can happen now.</div>
+  </section>
+
+  <section id="p3">
+    <span class="parttag">Part III</span>
+    <h2>Filecoin's real place: not a hyperscaler rival — a wedge</h2>
+    <p>Does Filecoin compete with AWS, Azure, Google Cloud? At the level usually claimed, no — and framing it that way loses.</p>
+    <div class="stats">
+      <div class="stat"><div class="n">~$500B</div><div class="l">Cloud infra annual run-rate (+35% YoY)</div></div>
+      <div class="stat"><div class="n">~$725B</div><div class="l">Big-4 AI capex projected for 2026</div></div>
+      <div class="stat"><div class="n">~$0.5B</div><div class="l">All decentralized storage, combined</div></div>
+      <div class="stat"><div class="n">~1,000×</div><div class="l">Cloud vs decentralized storage</div></div>
+    </div>
+    <table>
+      <tr><th>Dimension</th><th>Winner</th><th>Detail</th></tr>
+      <tr><td>Hot-storage price</td><td>Filecoin</td><td>~$2.50/TiB-mo vs $20–25 (8–10× cheaper)</td></tr>
+      <tr><td><b>Deep-archive price</b></td><td>Hyperscalers</td><td>Glacier Deep / Azure Archive ~$1.09 — Filecoin is <b>2–4× more expensive</b> here</td></tr>
+      <tr><td>Egress fees</td><td>Filecoin</td><td><b>$0</b> vs $0.09–0.12/GB — the lock-in pain point</td></tr>
+      <tr><td>Verifiability (PoSt/PDP)</td><td>Filecoin</td><td>No hyperscaler offers cryptographic proof of storage</td></tr>
+      <tr><td>Latency, SLAs, ecosystem</td><td>Hyperscalers</td><td>Disqualifying for hot/AI I/O; enterprise certs</td></tr>
+    </table>
+    <div class="box verdict"><span class="label">Verdict</span>Filecoin's place is a <b>complement and specialist</b>: the verifiable, egress-free, sovereign home for data that <em>structurally requires</em> those properties. It wins on egress and verifiability — not on price (it isn't even cheapest on deep archive) and not on performance. Its ceiling isn't "becoming the cloud"; it's "becoming the trust/persistence layer the cloud can't be."</div>
+  </section>
+
+  <section id="p4">
+    <span class="parttag">Part IV</span>
+    <h2>The fashionable wedges, tested skeptically</h2>
+    <h3>AI data provenance</h3>
+    <p>The headline AI wedge largely dissolves under scrutiny. <b>Provenance does not need a blockchain</b> — C2PA / Content Credentials (PKI, <em>explicitly no blockchain</em>) plus transparency logs already solve attestation, and ship in the Pixel 10, Sony/Leica cameras, and OpenAI's output. Crucially, <b>Filecoin proves possession, not origin</b>: PDP attests "these bytes are held intact," never "who created them." Selling Filecoin proofs <em>as</em> provenance is a category error. Demand is <b>nascent</b> — competitors (0G ~$290M, Story ~$140M) are louder, and the DataDAO momentum went to a non-Filecoin chain.</p>
+    <h3>Real-world-asset (RWA) tokenization</h3>
+    <p>A token is structurally <em>insufficient</em> — RWAs need a persistent, verifiable data layer (legal docs, proof-of-reserves, NAV, retention per SEC 17a-4 / MiFID). But the market already met the part it values (NAV/reserves) with <b>oracles</b> (Chainlink publishes <em>numbers, not documents</em>), and decentralized-storage adoption in institutional RWA is <b>~zero</b>. The live IPFS pattern (RealT) is the cautionary tale, not the proof.</p>
+    <div class="box key"><span class="label">The recurring pattern</span>In every wedge — egress, AI provenance, RWA — Filecoin wins the same narrow layer (<b>verifiable persistence</b>) and always <b>beneath a value/attestation layer it doesn't own</b> (oracles, C2PA, issuers). That is itself the central strategic finding: don't sell the wedge; sell the persistence substrate — and find where value <em>can</em> accrue to FIL.</div>
+  </section>
+
+  <section id="p5">
+    <span class="parttag">Part V</span>
+    <h2>Are the objectives even right? A CEO's reframe</h2>
+    <p>The official objectives nail the diagnosis but read like an aspiration deck: three overlapping demand goals, a cryptoeconomics pillar that <em>ducks the one existential question</em>, no chosen wedge, no stated sacrifices, and — explicitly — no targets. As a turnaround CEO we'd compress them into four sharper ones:</p>
+    <ul class="tight">
+      <li><b>O1 — Win one wedge decisively</b> (verifiable, egress-free persistence — not the AI-provenance hype). Concede hot/AI-IO and general cloud.</li>
+      <li><b>O2 — Make FIL value-capture from real revenue the centerpiece</b> — the burn/lock question <em>is</em> the whole ballgame.</li>
+      <li><b>O3 — Survive the SP/security bridge to the Oct-2026 cliff.</b></li>
+      <li><b>O4 — Build real distribution</b> — demand is sold, not announced.</li>
+    </ul>
+    <div class="box verdict"><span class="label">The through-line</span>The official plan optimizes for <em>getting demand</em>. A turnaround optimizes for <b>getting demand in the one place we can win, converting it into FIL value before the cliff, without dying of supply collapse first.</b> O2 — value capture — is where any serious proposal must plant its flag.</div>
+  </section>
+
+  <section id="p6">
+    <span class="parttag">Part VI</span>
+    <h2>The heart of it: does paid demand reach FIL? (No.)</h2>
+    <p>This is the existential question. The answer, from the mechanics, is unambiguous: <b>FIL captures essentially no value from paid usage today.</b> Every live FIL lock/burn is keyed to <em>committed capacity, faults, or congestion</em> — not paid demand. When a client pays via Filecoin Pay in USDFC/USDC, the stablecoin settles to the provider and <b>FIL is never touched</b>; the SP then often <em>sells</em> FIL for opex — net sell-pressure.</p>
+    <h3>The precedent library: what actually captures value</h3>
+    <p>The decisive variable is never the primitive (burn/buyback/fee-share) — it's <b>where the money comes from</b>. The test: <em>is the token bought with money from outside the token system?</em></p>
+    <table>
+      <tr><th>Archetype</th><th>Quality</th><th>Example</th></tr>
+      <tr><td>Fee-burn of native-token fees</td><td>Cosmetic</td><td>ETH EIP-1559 (now net inflationary); BNB (price-formula)</td></tr>
+      <tr><td><b>Buyback-burn from real revenue</b></td><td><b>High</b></td><td>Hyperliquid — 97% of fees, &gt;$1.3B</td></tr>
+      <tr><td>Fee-share / real yield</td><td>High</td><td>GMX — fees paid in ETH/AVAX</td></tr>
+      <tr><td>Vote-escrow (ve)</td><td>Mixed</td><td>fee slice real, emissions slice circular</td></tr>
+      <tr><td>Collateral/staking sink alone</td><td>Low</td><td>generic PoS — <em>and Filecoin pledge</em></td></tr>
+      <tr><td><b>Work-token + stablecoin revenue</b></td><td><b>High & durable</b></td><td>MakerDAO/Sky Smart Burn Engine</td></tr>
+    </table>
+    <div class="box warn"><span class="label">The hard re-evaluation</span>Our own earlier concept (lFIL liquid staking + bonded lock) is <b>mostly a collateral/lock sink</b> — the archetype the research flags as "masquerading as value capture." It sits on the weak, reflexive side. The defensible move is a <b>revenue-conversion engine</b> (external stablecoin revenue → buy & burn/stake FIL), the MakerDAO/Sky + Hyperliquid model.</div>
+  </section>
+
+  <section id="p7">
+    <span class="parttag">Part VII</span>
+    <h2>The program decoded — and a striking confirmation</h2>
+    <p>ProPGF Batch 3 ($2M pool, $300K cap, ~$200K avg, 6-month horizon) is, in effect, our CEO-objective set turned into an RFP — and judged ruthlessly on <b>named paying customers, SLAs in production, mainnet in six months, ARR conversion.</b> Its exclusions kill research-only work, SDKs/tooling, single-counterparty designs, and demand-less primitives.</p>
+    <p>Area 4's <b>flagship "strong proposal" example</b>, verbatim: <em>"a fee-and-burn module that routes a fixed share of USDC-denominated storage payments through a Filecoin-native swap-to-FIL-and-burn path — with reference implementation, economic model, and a FIP track."</em></p>
+    <div class="box good"><span class="label">Confirmation</span>That flagship example is almost word-for-word the mechanism we'd <b>independently derived</b> from the value-capture analysis. The program's preferred design and our front-runner are the same thing — and the RFP even names the exact sub-problem we'd flagged: <b>fee-and-burn on stablecoin payment rails.</b></div>
+  </section>
+
+  <section id="p8">
+    <span class="parttag">Part VIII</span>
+    <h2>How the payment economy actually works</h2>
+    <p>Before designing, we read the machinery — and the Filecoin Pay source code surfaced two findings that reshape the design.</p>
+    <div class="box warn"><span class="label">Finding 1 — the base burn already exists</span>Filecoin Pay already charges a hard-coded <b>0.5% network fee, burned to FIL</b> — and for stablecoins it accumulates and is <b>converted to FIL via a Dutch auction and burned</b>. The "swap-to-FIL-and-burn" path partly ships today (and is non-upgradeable). A proposal must go <b>beyond</b> it, not reinvent it.</div>
+    <div class="box warn"><span class="label">Finding 2 — two economies barely touch</span>A FIL-native <em>protocol</em> economy (rewards, pledge, burns — all supply-side) and a <em>commercial</em> economy (clients paying providers in stablecoin) are structurally decoupled. <b>The client's dollar never becomes FIL</b> beyond the 0.5% + gas.</div>
+    <h3>The value-flow schema</h3>
+    <div class="diagram"><pre>                  ┌──── FIL EMISSION (block rewards) ────┐
+                  └───────────────┬──────────────────────┘
+  DEMAND ($)                      ▼                  SUPPLY-SIDE FIL SINKS
+  ┌──────┐ USDFC  ┌──────────────────────┐    │ SP │─pledge──▶ 🔒 LOCKED (~78M FIL)
+  │CLIENT│──────▶ │    FILECOIN PAY      │─net─▶ revenue   ─gas/FIP-0100/penalties▶ 🔥 BURN
+  └──────┘  pays  │  (rail per service)  │ (stablecoin) │
+                  │  −0.5% fee ──────────┼──▶ 🔥 BURN ✅ (ERC-20: Dutch auction→FIL→burn)
+                  │  −operator commission┼──▶ ⊕ serviceFeeRecipient (= 0 today → OPEN HOOK)
+                  │  = net → payee       │
+                  └──────────────────────┘
+  Actors touching rails but NOT FIL: stablecoin issuers · processors · retrieval providers
+        └──▶ ⊕ "access-to-rails tied to a FIL lock"  (RFP sub-area 4 — OPEN)
+
+  Legend: 🔥 burns FIL · 🔒 locks FIL · ⊕ open capture hook · ✅ already exists</pre></div>
+    <p>The cleanest open hook is the <b>operator/commission layer</b> (Warm Storage leaves it at 0): an app-layer module can capture value <em>above</em> the 0.5%, counterparty-plural, with no protocol change.</p>
+  </section>
+
+  <section id="p9">
+    <span class="parttag">Part IX</span>
+    <h2>A worked example: follow one dollar</h2>
+    <p>A customer stores 100 TiB + retrieves 20 TiB for a year ≈ <b>$3,140</b> in USDFC.</p>
+    <table>
+      <tr><th>Scenario</th><th>Reaches FIL</th><th>Result</th></tr>
+      <tr><td>Today (0.5% protocol burn)</td><td>$15.70 (0.5%)</td><td>🔥 ~18 FIL/yr — 99.5% leaks past FIL</td></tr>
+      <tr><td>+3% capture module → buy & burn</td><td>$109.90 (3.5%)</td><td>🔥 ~126 FIL/yr (7×)</td></tr>
+      <tr><td>+10% lock-for-access (processor)</td><td>—</td><td>🔒 ~361 FIL locked (sticky)</td></tr>
+    </table>
+    <p>At network scale (illustrative growth, not a forecast), the leverage is the point:</p>
+    <table>
+      <tr><th>Annual paid revenue</th><th>Today (0.5%)</th><th>+3% capture</th><th>+10% lock</th></tr>
+      <tr><td>$100M</td><td>🔥 575K FIL (0.07%)</td><td>🔥 4.0M FIL (0.46%)</td><td>🔒 11.5M FIL (1.3%)</td></tr>
+      <tr><td>$500M</td><td>🔥 2.9M FIL (0.33%)</td><td>🔥 20M FIL (2.3%)</td><td>🔒 57.5M FIL (6.6%)</td></tr>
+    </table>
+    <div class="box key"><span class="label">Two lessons</span>(1) <b>The leak is the headline</b> — today 99.5% of every storage dollar bypasses FIL. (2) <b>Burn is linear with revenue; lock is sticky and stock-like</b> — and at scale the lock dominates the burn ~30× in FIL terms. A strong design uses both. (And the locker is the <em>business-on-the-rails</em> actor — processor/SP/issuer — never the end client.)</div>
+  </section>
+
+  <section id="p10">
+    <span class="parttag">Part X</span>
+    <h2>The design: the FIL Value Engine</h2>
+    <p>Designing the staking layer revealed the sharpening that makes the whole thing coherent: <b>the provider's opt-in "capture" cut IS an SLA-insurance premium.</b> The mechanism collapses from "an abstract value skim + staking" into a real product.</p>
+    <div class="box verdict"><span class="label">The concept</span>An on-chain <b>SLA-insurance market</b>: SPs/processors pay a premium (% of paid revenue) to offer <b>funded</b> SLA guarantees to clients. The premium <b>(a) burns FIL</b> (scarcity) and <b>(b) pays FIL stakers who underwrite the guarantees</b> (a claim on network revenue). FIL captures value as the byproduct of a real product — not a circular skim.</div>
+    <div class="diagram"><pre>PAID REVENUE (USDFC) ─▶ ① CAPTURE (premium, counterparty-plural: operator / serviceFeeRecipient / voluntary)
+                         │
+                         ▼ ② CONVERT  stablecoin → FIL (Uniswap v3 on FEVM) + surplus buffer
+                         │
+                         ▼ ③ ROUTE (governance split)
+                            ├─▶ 🔥 BURN          (scarcity, all holders)
+                            ├─▶ 💰 STAKE-YIELD   (real yield to stakers)
+                            └─▶ 🛡 RESERVE        (correlated-tail buffer)
+                         │
+                         ▼ ④ STAKE & BACKSTOP — stake FIL → earn yield + rail access
+                            └ underwrite SP SLA breaches:
+                              loss waterfall = SP bond (1st loss, slashed→client)
+                                             → staker pool (2nd) → reserve (tail)
+                              triggers: PDP faults = parametric auto-pay; retrieval = oracle+dispute
+                         │
+                         ▼ ⑤ MEASURE — public dashboard (burn · staked · APY · coverage)
+
+FLYWHEEL: paid usage ↑ → premium ↑ → FIL bought (burn+yield) ↑ → scarcer & yield-bearing →
+          more staked → deeper SLA backstop → better insured service → more paid usage ↻</pre></div>
+    <p><b>Why it's the right Area-4 mechanism:</b> it goes beyond the existing 0.5% burn; it's <b>non-circular</b> (FIL bought with external stablecoin revenue); it has a <b>real adoption logic</b> (providers pay <em>because</em> they sell funded SLAs); it's <b>solvent by construction</b> (bounded payouts, SP-first-loss, correlation-aware capital, reserve tranche — the FIP-0098 "uninsurable" lesson); and it clears every Area-4 exclusion (counterparty-plural, app-layer mainnet v1 + FIP track, structural & automated).</p>
+  </section>
+
+  <section id="p11">
+    <span class="parttag">Part XI</span>
+    <h2>The economic model</h2>
+    <p>The premium must price the <b>correlated tail</b> (mass SP failure), not the average fault rate — that's the solvency crux. Illustratively: premium <code>p ≈ 3%</code> of paid revenue, split <b>50% burn / 40% staker yield / 10% reserve</b> (buffer-first). Staking finds equilibrium where yield-implied APY meets stakers' required return: <code>staked FIL = yield ÷ APY</code>.</p>
+    <table>
+      <tr><th>At $100M revenue</th><th>Premium pool</th><th>🔥 Burn/yr</th><th>🔒 FIL staked (8% APY)</th></tr>
+      <tr><td>FVE engine</td><td>$3M</td><td>1.7M FIL</td><td>~17.2M FIL (2.0% of supply)</td></tr>
+      <tr><td>vs today (0.5% only)</td><td>—</td><td>0.58M FIL</td><td>0 staked</td></tr>
+    </table>
+    <p>At $500M, ~86M FIL staked — comparable to the <em>entire</em> current SP pledge. Solvency holds via <code>coverage ≤ gearing × (stake + reserve + SP bonds)</code> with conservative gearing (~1×, not Nexus's 4.8×); you never sell more coverage than capacity. The optimization maximizes <b>FIL captured × volume retained</b> subject to solvency — so early <code>p</code> stays <em>low</em> (nascent demand) and the proposal sells the <b>compounding curve</b>, not a big day-1 take.</p>
+  </section>
+
+  <section id="p12">
+    <span class="parttag">Part XII</span>
+    <h2>The proposal</h2>
+    <p>A 6-month, milestone-based build (requested $300K), shipping a full stacked v1 on mainnet plus a FIP track for the protocol-level slice.</p>
+    <table>
+      <tr><th>Milestone</th><th>Ships</th><th>Payout</th></tr>
+      <tr><td>M1 · Month 2</td><td>Capture + convert + burn on testnet; economic/solvency model + parameter spec</td><td>$90K</td></tr>
+      <tr><td>M2 · Month 4</td><td>Staking + PDP-parametric SLA backstop; audit; public dashboard; FIP draft; capped mainnet</td><td>$110K</td></tr>
+      <tr><td>M3 · Month 6</td><td>Open mainnet; ≥3 opt-in SPs/processors paying premiums → burn + staker yield; live coverage</td><td>$100K</td></tr>
+    </table>
+    <h3>Why Protofire</h3>
+    <ul class="tight">
+      <li><b>Uniswap v3 on FEVM</b> — DAO-approved deployer (the conversion layer).</li>
+      <li><b>Battle-tested liquid staking</b> — Aethir ($20M staked in 90 days), MANTRA (live) — the staking layer.</li>
+      <li><b>Tokenomics + governance/FIP</b> depth for the economic model and FIP track; 41 veToken deployments, $730M TVL driven.</li>
+    </ul>
+    <div class="box good"><span class="label">v1 honesty</span>Start with <b>PDP-native faults only</b> (clean parametric auto-pay), conservative caps, SP-first-loss, a basic reserve. Retrieval coverage and dynamic correlation-pricing iterate. Shippable and solvable — no hand-waving.</div>
+  </section>
+
+  <section id="conclusion">
+    <span class="parttag">Conclusion</span>
+    <h2>The through-line</h2>
+    <p>Filecoin's 2026 turnaround rests on one unsolved problem: <b>paid demand does not reach FIL.</b> The strategy's objectives are right in spirit but unfocused; the fashionable wedges are narrower than the hype; the network's defensible place is verifiable persistence, not the cloud. The grant program — and the value-capture analysis — converge on the same answer: a mechanism that turns external, stablecoin-denominated paid revenue into FIL value, <em>structurally and non-circularly</em>.</p>
+    <div class="box verdict"><span class="label">The answer</span>The <b>FIL Value Engine</b> — a funded, on-chain SLA-insurance market whose premiums burn FIL and pay FIL stakers who underwrite service quality — is the mechanism that makes the entire 2026 strategy actually accrue to the token. It is the rung at the bottom of the ladder, and it is load-bearing.</div>
+  </section>
+
+  </main>
+</div>
+
+<footer class="footer">
+  <p><b>Sources & confidence.</b> Grounded in Filecoin's 2026 strategy, the spec & FIPs repo, the Filecoin Pay / Warm Storage source code, Messari/Coinbase/analyst data, and cross-protocol precedents (MakerDAO/Sky, Hyperliquid, EigenLayer, Sherlock, Etherisc). Market figures and on-chain values are point-in-time and cited in the underlying research notes (00–14). Economic parameters are illustrative pending calibration.</p>
+  <p>Prepared by Protofire · Working document, not a commitment · Not investment advice.</p>
+</footer>
+
+</body>
+</html>
