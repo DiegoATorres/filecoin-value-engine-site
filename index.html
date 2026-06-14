@@ -112,7 +112,8 @@
       <li><a class="part" href="#p9">IX · A worked example</a></li>
       <li><a class="part" href="#p10">X · The design</a></li>
       <li><a class="part" href="#p11">XI · The economic model</a></li>
-      <li><a class="part" href="#p12">XII · The proposal</a></li>
+      <li><a class="part" href="#p12">XII · The first design</a></li>
+      <li><a class="part" href="#p13">XIII · Red-team & the pivot</a></li>
       <li><a class="part" href="#conclusion">Through-line</a></li>
     </ol>
   </nav>
@@ -122,26 +123,29 @@
   <section id="exec">
     <span class="parttag">Executive summary</span>
     <h2>The proposal, in plain terms</h2>
-    <p><b>In one breath:</b> Filecoin is finally getting <em>paid</em> for storage — but the money is paid in stablecoins and <b>never reaches FIL</b>, the token that secures the network. As paid usage grows, FIL value capture doesn't. We fix that with a real product.</p>
+    <p><b>In one breath:</b> Filecoin is finally getting <em>paid</em> for storage — but the money is paid in stablecoins and <b>never reaches FIL</b>, the token that secures the network. As paid usage grows, FIL value capture doesn't. We fix that with a neutral public rail.</p>
     <h3>The problem</h3>
-    <p>When a client pays for Filecoin storage today, the payment settles to the provider in a stablecoin (USDFC/USDC). <b>FIL is barely touched.</b> Every existing way FIL gains value is tied to <em>capacity</em> and funded by <em>shrinking token emissions</em> — not by paid demand. So the network can succeed commercially while the token fails. (Separately, Filecoin advertises service guarantees — SLAs — that aren't actually funded.)</p>
+    <p>When a client pays for Filecoin storage, the payment settles to the provider in a stablecoin (USDFC/USDC). <b>FIL is barely touched.</b> Every existing way FIL gains value is tied to <em>capacity</em> and funded by <em>shrinking token emissions</em> — not by paid demand. So the network can succeed commercially while the token fails. Filecoin Pay already burns a tiny, hard-coded <b>0.5%</b> to FIL — proof the network <em>wants</em> this — but it's fixed and tiny. What's missing is a <b>credible, neutral, extensible rail.</b></p>
     <h3>The idea</h3>
-    <p>Turn paid storage into FIL value through a product people actually want: <b>a funded SLA-insurance market.</b></p>
+    <p>A neutral, open, <b>counterparty-plural rail</b> that makes paid usage accrue to FIL:</p>
     <ul class="tight">
-      <li>Storage providers pay a small <b>premium</b> to promise clients <b>guaranteed</b> service — backed by real capital, not marketing.</li>
-      <li>That premium <b>buys and burns FIL</b> (makes it scarcer) and <b>pays FIL stakers who insure the guarantee</b> (gives FIL a real income stream).</li>
-      <li>Result: <b>better service for clients, real demand for FIL, and the network's #1 KPI — paid usage — finally accrues to the token.</b></li>
+      <li>Services and processors <b>opt in</b> to route a small, configurable slice of their paid-storage revenue through the engine.</li>
+      <li>That revenue <b>buys and burns FIL</b> (scarcity) and feeds an <b>open stake-yield</b> — any FIL holder can stake and earn a real share of the flow.</li>
+      <li>A <b>smoothing buffer held in stablecoins</b> makes the burn steady (not pro-cyclical) — and there's no token-vs-dollar mismatch.</li>
+      <li>A <b>FIP</b> lifts a slice to protocol level — the path to meaningful scale.</li>
     </ul>
     <h3>Why it's strong (and different)</h3>
     <ul class="tight">
-      <li><b>Not a token gimmick</b> — value capture is the byproduct of a product (funded SLAs), so there's a real reason providers pay.</li>
-      <li><b>Not circular</b> — the money comes from <em>outside</em> the FIL system, the proven MakerDAO/Sky &amp; Hyperliquid model.</li>
-      <li><b>It ships</b> — live on mainnet in 6 months; works with any provider and any stablecoin; builds on what already exists (Filecoin Pay, USDFC, Uniswap v3) instead of reinventing it.</li>
-      <li><b>A public good</b> — open-source, contributed as a standard (FIP), community-governed.</li>
+      <li><b>Not a token gimmick</b> — FIL is bought with money from <em>outside</em> the FIL system, the proven MakerDAO/Sky &amp; Hyperliquid model.</li>
+      <li><b>It ships</b> — live on mainnet in 6 months; any provider, any stablecoin; builds on what already exists (Filecoin Pay, USDFC, Uniswap v3) instead of reinventing it.</li>
+      <li><b>Honest infrastructure</b> — we don't claim huge day-1 revenue (paid demand is nascent); we ship the neutral rail + economic model + FIP, ready to capture flow as the 2026 demand strategy plays out.</li>
+      <li><b>A public good</b> — open-source, <b>no privileged fee or position for the builder</b>, community-governed, contributed as a standard (FIP).</li>
     </ul>
+    <h3>What we deliberately left out (and why)</h3>
+    <p>We first designed a more ambitious version — a <em>funded SLA-insurance market</em> where stakers underwrite storage-provider failures. We <b>red-teamed it hard</b> (Part XIII) and found it needs a protocol change to slash provider collateral, carries a token-vs-dollar mismatch that's dangerous in a downturn, and presupposes SLA demand that doesn't yet exist. So we <b>scoped insurance to a future research track</b> and shipped the value-accrual rail that survives scrutiny. <em>Rigor over ambition.</em></p>
     <div class="box verdict"><span class="label">The ask · one-sentence pitch</span>
-      <b>$300,000 · 6 months · milestone-based.</b> The FIL Value Engine makes Filecoin's growing paid revenue flow back into FIL — by turning service guarantees into a funded insurance market whose premiums burn FIL and pay the stakers who back them.</div>
-    <p class="muted" style="font-size:14px">The rest of this page is the full reasoning behind that proposal — built step by step, with the numbers shown.</p>
+      <b>$240,000 · 6 months · milestone-based.</b> The FIL Value Engine is a neutral public rail that makes Filecoin's growing paid revenue accrue to FIL — buying and burning FIL with real external revenue and paying FIL stakers a share of the flow — turning the network's own paid-usage KPI into FIL value.</div>
+    <p class="muted" style="font-size:14px">The rest of this page is the full reasoning behind that proposal — built step by step, with the numbers shown, including the adversarial test that focused it (Part XIII).</p>
   </section>
 
   <section id="method">
@@ -354,11 +358,26 @@ FLYWHEEL: paid usage ↑ → premium ↑ → FIL bought (burn+yield) ↑ → sca
     <div class="box good"><span class="label">v1 honesty</span>Start with <b>PDP-native faults only</b> (clean parametric auto-pay), conservative caps, SP-first-loss, a basic reserve. Retrieval coverage and dynamic correlation-pricing iterate. Shippable and solvable — no hand-waving.</div>
   </section>
 
+  <section id="p13">
+    <span class="parttag">Part XIII</span>
+    <h2>Red-team — and the pivot that made it fundable</h2>
+    <p>Before committing, we ran an <b>adversarial stress-test</b>: four independent hostile reviews (demand, cryptoeconomics, technical, committee-fit) attacking the funded-SLA design with no charity. They converged on real, fatal flaws — several using <em>our own research</em> against the design:</p>
+    <ul class="tight">
+      <li><b>SP-first-loss isn't enforceable</b> — you can't slash a storage provider's protocol pledge from an app-layer contract; native slashing burns, it doesn't redistribute. Needs a passed FIP.</li>
+      <li><b>Currency mismatch</b> — claims are in dollars, collateral in FIL; the trigger for mass claims <em>is</em> a FIL crash, so coverage collapses exactly when it's needed. Pro-cyclical insolvency.</li>
+      <li><b>Capture isn't a "protocol skim"</b> — it's honestly voluntary opt-in (Filecoin Pay's commission lane belongs to whoever is the operator).</li>
+      <li><b>Burning half the insurance float</b> before reserving against a tail 5–10× the mean is structurally short-vol.</li>
+      <li><b>No funded-SLA demand yet</b> — the buyers who'd want it are nascent on Filecoin.</li>
+    </ul>
+    <div class="box warn"><span class="label">What we did</span>We didn't defend the design — we <b>focused it.</b> We dropped the insurance/underwriting layer to a <em>future research/FIP track</em>, and shipped the part that survives every attack: a neutral <b>value-accrual rail</b> (opt-in capture → convert → Sky-style buffer-first burn held in stablecoins → open stake-yield), counterparty-plural, no currency mismatch, no unenforceable slashing, mainnet-shippable in 6 months at ~$240K. That is the proposal in the executive summary above.</div>
+    <p class="muted" style="font-size:14px">The full red-team report and the option comparison (A original · B staking/SLA · C modular · D focused) live in the research notes.</p>
+  </section>
+
   <section id="conclusion">
     <span class="parttag">Conclusion</span>
     <h2>The through-line</h2>
     <p>Filecoin's 2026 turnaround rests on one unsolved problem: <b>paid demand does not reach FIL.</b> The strategy's objectives are right in spirit but unfocused; the fashionable wedges are narrower than the hype; the network's defensible place is verifiable persistence, not the cloud. The grant program — and the value-capture analysis — converge on the same answer: a mechanism that turns external, stablecoin-denominated paid revenue into FIL value, <em>structurally and non-circularly</em>.</p>
-    <div class="box verdict"><span class="label">The answer</span>The <b>FIL Value Engine</b> — a funded, on-chain SLA-insurance market whose premiums burn FIL and pay FIL stakers who underwrite service quality — is the mechanism that makes the entire 2026 strategy actually accrue to the token. It is the rung at the bottom of the ladder, and it is load-bearing.</div>
+    <div class="box verdict"><span class="label">The answer</span>The <b>FIL Value Engine</b> — a neutral public rail that buys and burns FIL with real external (stablecoin) revenue and pays FIL stakers a share of the flow, with a FIP to make a slice protocol-level — is the mechanism that makes the entire 2026 strategy actually accrue to the token. Stress-tested, focused, and shippable: it is the rung at the bottom of the ladder, and it is load-bearing.</div>
   </section>
 
   </main>
