@@ -112,7 +112,8 @@
       <li><a class="part" href="#p9">IX · A worked example</a></li>
       <li><a class="part" href="#p10">X · The design</a></li>
       <li><a class="part" href="#p11">XI · The economic model</a></li>
-      <li><a class="part" href="#p12">XII · The plan</a></li>
+      <li><a class="part" href="#p12">XII · The architecture</a></li>
+      <li><a class="part" href="#p13">XIII · The plan</a></li>
       <li><a class="part" href="#conclusion">Through-line</a></li>
     </ol>
   </nav>
@@ -351,6 +352,40 @@ Staking equilibrium: S = (y · c · R) / a   (stakers supply FIL until APY a cle
 
   <section id="p12">
     <span class="parttag">Part XII</span>
+    <h2>The architecture</h2>
+    <p>The rail is a small set of single-purpose contracts on <b>FEVM</b> — immutable code with governance-set parameters (no upgradeable proxies), so the audit surface stays small and the neutral, non-rug property is obvious. Value flows left to right; governance only tunes the dials.</p>
+    <div class="diagram"><pre>PAID REVENUE (USDFC/USDC) over Filecoin Pay rails
+            │
+  ① CAPTURE · FVECaptureRouter  ── counterparty-plural, two paths:
+            │   • operator commission → serviceFeeRecipient
+            │   • voluntary push by any payee/processor
+            ▼
+  ② BUFFER · FVETreasury (held in stablecoins)  ── holds to target B*; exposes excess = bal − B*
+            │   keeper calls execute() iff excess > 0  (permissionless, incentivized)
+            ▼
+  ③ ENGINE · FVEEngine  ── swap min(excess, maxPerCall) stable→WFIL (Uniswap v3)
+            │   TWAP-checked · slippage-capped · split b/y
+            ├─▶ 🔥 BURN   unwrap → f099 (permanent)
+            └─▶ 💰 YIELD  → FVEStakingPool
+                            ▼
+  ④ STAKE · FVEStakingPool  ── stake WFIL → earn FIL · liquid · reward-per-share
+
+  ⑤ MEASURE · subgraph + dashboard (events from ①–④)
+  GOVERNANCE · Safe multisig + timelock — sets split b/y, buffer B*, slippage/TWAP/caps, keeper tip</pre></div>
+    <table>
+      <tr><th>Contract</th><th>Responsibility</th></tr>
+      <tr><td><b>FVECaptureRouter</b></td><td>Receives captured stablecoin (commission recipient + voluntary push); per-adopter attribution; forwards to Treasury. Anyone can route in.</td></tr>
+      <tr><td><b>FVETreasury</b></td><td>Custodies the stablecoin buffer; tracks target <code>B*</code>; reports <code>excess</code>. Only the Engine can pull excess.</td></tr>
+      <tr><td><b>FVEEngine</b></td><td>Keeper-callable core: pull excess → swap (v3, TWAP+slippage guarded) → split → burn-leg to <code>f099</code>, yield-leg to the pool → small keeper tip. <code>execute()</code> is permissionless; params are governance-only.</td></tr>
+      <tr><td><b>FVEStakingPool</b></td><td>Open, liquid stake-WFIL-earn-FIL pool; reward-per-share accumulator; funded by the Engine. No lockup, no admin over user funds.</td></tr>
+      <tr><td><b>Governance</b></td><td>Safe multisig + timelock owning the parameters; guardian pause limited to flow, never staked principal.</td></tr>
+    </table>
+    <p>Three choices define it: <b>(1)</b> conversion runs on <b>Uniswap v3 on FEVM</b> (Protofire is a DAO-approved v3 deployer; Oku surfaces the same deployment) with a <b>TWAP</b>-derived minimum-out — a spot-price flash-loan can't drain the swap; <b>(2)</b> the convert+burn step is <b>permissionless</b> — anyone triggers it when the buffer is above target, so there's no privileged operator and no central point of control; <b>(3)</b> <b>Protofire takes no fee and no position</b> — the only outflows are burn, staker yield, and the keeper tip (paid to whoever calls). The <b>capture rate is per-adopter</b> (each chooses what to route); governance only sets the split, buffer, and safety params. The protocol-level slice is the <b>FIP track</b>, not a v1 contract.</p>
+    <p class="muted" style="font-size:14px">Full technical design — interfaces, sequence flows, conversion/oracle detail, and the security model — is in the research notes (<code>research/21</code>).</p>
+  </section>
+
+  <section id="p13">
+    <span class="parttag">Part XIII</span>
     <h2>The plan</h2>
     <p>A 6-month, milestone-based build — <b>$240,000</b> — shipping the rail on mainnet plus a FIP track for the protocol-level slice.</p>
     <table>
