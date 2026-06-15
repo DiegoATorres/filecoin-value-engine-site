@@ -297,7 +297,7 @@ emission decay    ─┘                          (Onchain Cloud)
       <tr><td>$100M</td><td>🔥 575K FIL (0.07%)</td><td>🔥 4.0M FIL (0.46%)</td><td>🔒 11.5M FIL (1.3%)</td></tr>
       <tr><td>$500M</td><td>🔥 2.9M FIL (0.33%)</td><td>🔥 20M FIL (2.3%)</td><td>🔒 57.5M FIL (6.6%)</td></tr>
     </table>
-    <div class="box key"><span class="label">Two lessons</span>(1) <b>The leak is the headline</b> — today 99.5% of every storage dollar bypasses FIL. (2) <b>Burn is linear with revenue; lock is sticky and stock-like</b> — and at scale the lock dominates the burn ~30× in FIL terms. A strong design uses both. (And the locker is the <em>business-on-the-rails</em> actor — processor/SP/issuer — never the end client.)</div>
+    <div class="box key"><span class="label">Two lessons</span>(1) <b>The leak is the headline</b> — today 99.5% of every storage dollar bypasses FIL. (2) <b>Burn is linear with revenue; lock is sticky and stock-like</b> — and at scale the lock dominates the burn by roughly an order of magnitude in FIL terms (the model invariant <code>locked/burned = y/(a·b)</code> ≈ 10–12× at working parameters). A strong design uses both. (And the locker is the <em>business-on-the-rails</em> actor — processor/SP/issuer — never the end client.)</div>
   </section>
 
   <section id="p10">
@@ -330,6 +330,7 @@ FLYWHEEL: paid usage ↑ → premium ↑ → FIL bought (burn+yield) ↑ → sca
   <section id="p11">
     <span class="parttag">Part XI</span>
     <h2>The economic model</h2>
+    <p class="muted" style="font-size:14px"><b>Note:</b> this is the economic model of the <em>pre-pivot</em> SLA-insurance design. After the red-team (Part XIII) the insurance layer was dropped, and the model simplifies to the leaner one shown there. Kept here to show the reasoning.</p>
     <p>The premium must price the <b>correlated tail</b> (mass SP failure), not the average fault rate — that's the solvency crux. Illustratively: premium <code>p ≈ 3%</code> of paid revenue, split <b>50% burn / 40% staker yield / 10% reserve</b> (buffer-first). Staking finds equilibrium where yield-implied APY meets stakers' required return: <code>staked FIL = yield ÷ APY</code>.</p>
     <table>
       <tr><th>At $100M revenue</th><th>Premium pool</th><th>🔥 Burn/yr</th><th>🔒 FIL staked (8% APY)</th></tr>
@@ -371,6 +372,22 @@ FLYWHEEL: paid usage ↑ → premium ↑ → FIL bought (burn+yield) ↑ → sca
       <li><b>No funded-SLA demand yet</b> — the buyers who'd want it are nascent on Filecoin.</li>
     </ul>
     <div class="box warn"><span class="label">What we did</span>We didn't defend the design — we <b>focused it.</b> We dropped the insurance/underwriting layer to a <em>future research/FIP track</em>, and shipped the part that survives every attack: a neutral <b>value-accrual rail</b> (opt-in capture → convert → Sky-style buffer-first burn held in stablecoins → open stake-yield), counterparty-plural, no currency mismatch, no unenforceable slashing, mainnet-shippable in 6 months at ~$240K. That is the proposal in the executive summary above.</div>
+
+    <h3>The focused economic model</h3>
+    <p>Dropping insurance collapses the model to its essentials — and removes every term the red-team attacked (no correlated tail to price, no solvency/coverage/gearing, no FIL-denominated reserve). What remains:</p>
+    <div class="diagram"><pre>Captured flow   V = c · R                 (capture rate c × paid revenue R)
+Smoothing buffer (in stablecoins) → target B*  · convert+burn runs ABOVE target
+Split above buffer:  BURN = b·V → 🔥        STAKE-YIELD = y·V → stakers   (b + y = 1)
+Staking equilibrium: S = (y · c · R) / a   (stakers supply FIL until APY a clears)</pre></div>
+    <p><b>We propose the mechanism — governance sets the numbers.</b> The live values are governance-set (<code>c</code>, split <code>b/y</code>, buffer <code>B*</code>) or market-set (APY <code>a</code>). Proposed ranges: capture <code>c</code> 0.5–4%, split 40–60% each leg, <code>a</code> ~5–12% — working figures <code>c=1%</code>, 50/50, <code>a=8%</code>. The existing hard-coded 0.5% protocol burn proves the network <em>wants</em> this; our rail makes the rate governable, measurable, and FIP-elevatable to protocol level.</p>
+    <table>
+      <tr><th>At working params (c=1%, 50/50, a=8%)</th><th>🔥 Burn/yr</th><th>🔒 FIL staked</th></tr>
+      <tr><td>$100M paid revenue</td><td>~575K FIL</td><td>~7.18M FIL (0.82% of supply)</td></tr>
+      <tr><td>$500M paid revenue</td><td>~2.87M FIL</td><td>~35.9M FIL (4.1% of supply)</td></tr>
+      <tr><td>vs today (0.5% only) @ $100M</td><td>~575K FIL</td><td>0 staked</td></tr>
+    </table>
+    <p>A model invariant — <code>locked/burned = y/(a·b)</code> ≈ <b>12.5×</b> at working params — confirms the earlier finding: <b>stake/lock is the dominant value-capture mode; burn is the permanence layer.</b> No solvency constraint (it's a buy-and-burn + fee-share, not an insurer); the only real tradeoff is capture rate vs. opt-in volume retained, so early <code>c</code> stays low and the proposal sells the <b>compounding curve</b>, not a day-1 take.</p>
+
     <p class="muted" style="font-size:14px">The full red-team report and the option comparison (A original · B staking/SLA · C modular · D focused) live in the research notes.</p>
   </section>
 
