@@ -154,7 +154,7 @@
     <p>This document is the argument, not a pitch. We descended a ladder — from the strategic to the tactical — and refused to skip a rung. Every claim is grounded in primary sources (Filecoin spec, FIPs, the Filecoin Pay source code, market data) and held to one standard: <em>be skeptical first</em>. Where the popular narrative was hype, we said so; where Filecoin's own pitch overclaimed, we flagged it.</p>
     <p>The path: understand the 2026 strategy → test whether its objectives are <em>right</em> against the real state of the ecosystem → locate Filecoin's defensible place in the data-infrastructure market → pressure-test the fashionable wedges (AI provenance, RWA) → re-derive the objectives as a turnaround CEO would → isolate the one existential question (does paid demand reach FIL?) → decode the grant program → learn exactly how the payment machinery works → and only then design a mechanism and model its economics.</p>
     <div class="box key"><span class="label">The thesis in one line</span>
-      Filecoin's survival hinges on converting paid demand into FIL value — and today it doesn't. The mechanism that fixes this is not a token sink but a <b>funded SLA-insurance market</b> whose premiums burn FIL and pay FIL stakers who underwrite service quality.</div>
+      Filecoin's survival hinges on converting paid demand into FIL value — and today it doesn't. The fix is a neutral public <b>value-accrual rail</b>: services opt in to route a slice of paid-storage revenue into a buy-and-burn-from-real-revenue engine plus an open stake-yield, with a FIP to lift a slice to protocol level. <span class="muted">(We first explored a more ambitious <em>funded SLA-insurance market</em>, then red-teamed and focused it down to this rail — that journey is Parts X–XIII.)</span></div>
   </section>
 
   <section id="p1">
@@ -303,7 +303,8 @@ emission decay    ─┘                          (Onchain Cloud)
   <section id="p10">
     <span class="parttag">Part X</span>
     <h2>The design: the FIL Value Engine</h2>
-    <p>Designing the staking layer revealed the sharpening that makes the whole thing coherent: <b>the provider's opt-in "capture" cut IS an SLA-insurance premium.</b> The mechanism collapses from "an abstract value skim + staking" into a real product.</p>
+    <p class="muted" style="font-size:14px"><b>Note:</b> Parts X–XII present the <em>first, more ambitious</em> design — a funded SLA-insurance market. The red-team in Part XIII focused it down to the leaner value-accrual rail that is the <b>actual proposal</b> (executive summary above; focused economic model in Part XIII). These sections are kept to show the reasoning that got us there.</p>
+    <p>Designing the staking layer revealed the sharpening that <em>seemed</em> to make the whole thing coherent: <b>the provider's opt-in "capture" cut looks like an SLA-insurance premium.</b> The mechanism collapses from "an abstract value skim + staking" into a real product — a framing we later stress-tested and dropped (Part XIII).</p>
     <div class="box verdict"><span class="label">The concept</span>An on-chain <b>SLA-insurance market</b>: SPs/processors pay a premium (% of paid revenue) to offer <b>funded</b> SLA guarantees to clients. The premium <b>(a) burns FIL</b> (scarcity) and <b>(b) pays FIL stakers who underwrite the guarantees</b> (a claim on network revenue). FIL captures value as the byproduct of a real product — not a circular skim.</div>
     <div class="diagram"><pre>PAID REVENUE (USDFC) ─▶ ① CAPTURE (premium, counterparty-plural: operator / serviceFeeRecipient / voluntary)
                          │
