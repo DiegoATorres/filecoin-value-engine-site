@@ -112,8 +112,7 @@
       <li><a class="part" href="#p9">IX · A worked example</a></li>
       <li><a class="part" href="#p10">X · The design</a></li>
       <li><a class="part" href="#p11">XI · The economic model</a></li>
-      <li><a class="part" href="#p12">XII · The first design</a></li>
-      <li><a class="part" href="#p13">XIII · Red-team & the pivot</a></li>
+      <li><a class="part" href="#p12">XII · The plan</a></li>
       <li><a class="part" href="#conclusion">Through-line</a></li>
     </ol>
   </nav>
@@ -141,11 +140,9 @@
       <li><b>Honest infrastructure</b> — we don't claim huge day-1 revenue (paid demand is nascent); we ship the neutral rail + economic model + FIP, ready to capture flow as the 2026 demand strategy plays out.</li>
       <li><b>A public good</b> — open-source, <b>no privileged fee or position for the builder</b>, community-governed, contributed as a standard (FIP).</li>
     </ul>
-    <h3>What we deliberately left out (and why)</h3>
-    <p>We first designed a more ambitious version — a <em>funded SLA-insurance market</em> where stakers underwrite storage-provider failures. We <b>red-teamed it hard</b> (Part XIII) and found it needs a protocol change to slash provider collateral, carries a token-vs-dollar mismatch that's dangerous in a downturn, and presupposes SLA demand that doesn't yet exist. So we <b>scoped insurance to a future research track</b> and shipped the value-accrual rail that survives scrutiny. <em>Rigor over ambition.</em></p>
     <div class="box verdict"><span class="label">The ask · one-sentence pitch</span>
       <b>$240,000 · 6 months · milestone-based.</b> The FIL Value Engine is a neutral public rail that makes Filecoin's growing paid revenue accrue to FIL — buying and burning FIL with real external revenue and paying FIL stakers a share of the flow — turning the network's own paid-usage KPI into FIL value.</div>
-    <p class="muted" style="font-size:14px">The rest of this page is the full reasoning behind that proposal — built step by step, with the numbers shown, including the adversarial test that focused it (Part XIII).</p>
+    <p class="muted" style="font-size:14px">The rest of this page is the full reasoning behind that proposal — built step by step, with the numbers shown.</p>
   </section>
 
   <section id="method">
@@ -154,7 +151,7 @@
     <p>This document is the argument, not a pitch. We descended a ladder — from the strategic to the tactical — and refused to skip a rung. Every claim is grounded in primary sources (Filecoin spec, FIPs, the Filecoin Pay source code, market data) and held to one standard: <em>be skeptical first</em>. Where the popular narrative was hype, we said so; where Filecoin's own pitch overclaimed, we flagged it.</p>
     <p>The path: understand the 2026 strategy → test whether its objectives are <em>right</em> against the real state of the ecosystem → locate Filecoin's defensible place in the data-infrastructure market → pressure-test the fashionable wedges (AI provenance, RWA) → re-derive the objectives as a turnaround CEO would → isolate the one existential question (does paid demand reach FIL?) → decode the grant program → learn exactly how the payment machinery works → and only then design a mechanism and model its economics.</p>
     <div class="box key"><span class="label">The thesis in one line</span>
-      Filecoin's survival hinges on converting paid demand into FIL value — and today it doesn't. The fix is a neutral public <b>value-accrual rail</b>: services opt in to route a slice of paid-storage revenue into a buy-and-burn-from-real-revenue engine plus an open stake-yield, with a FIP to lift a slice to protocol level. <span class="muted">(We first explored a more ambitious <em>funded SLA-insurance market</em>, then red-teamed and focused it down to this rail — that journey is Parts X–XIII.)</span></div>
+      Filecoin's survival hinges on converting paid demand into FIL value — and today it doesn't. The fix is a neutral public <b>value-accrual rail</b>: services opt in to route a slice of paid-storage revenue into a buy-and-burn-from-real-revenue engine plus an open stake-yield, with a FIP to lift a slice to protocol level.</div>
   </section>
 
   <section id="p1">
@@ -303,100 +300,68 @@ emission decay    ─┘                          (Onchain Cloud)
   <section id="p10">
     <span class="parttag">Part X</span>
     <h2>The design: the FIL Value Engine</h2>
-    <p class="muted" style="font-size:14px"><b>Note:</b> Parts X–XII present the <em>first, more ambitious</em> design — a funded SLA-insurance market. The red-team in Part XIII focused it down to the leaner value-accrual rail that is the <b>actual proposal</b> (executive summary above; focused economic model in Part XIII). These sections are kept to show the reasoning that got us there.</p>
-    <p>Designing the staking layer revealed the sharpening that <em>seemed</em> to make the whole thing coherent: <b>the provider's opt-in "capture" cut looks like an SLA-insurance premium.</b> The mechanism collapses from "an abstract value skim + staking" into a real product — a framing we later stress-tested and dropped (Part XIII).</p>
-    <div class="box verdict"><span class="label">The concept</span>An on-chain <b>SLA-insurance market</b>: SPs/processors pay a premium (% of paid revenue) to offer <b>funded</b> SLA guarantees to clients. The premium <b>(a) burns FIL</b> (scarcity) and <b>(b) pays FIL stakers who underwrite the guarantees</b> (a claim on network revenue). FIL captures value as the byproduct of a real product — not a circular skim.</div>
-    <div class="diagram"><pre>PAID REVENUE (USDFC) ─▶ ① CAPTURE (premium, counterparty-plural: operator / serviceFeeRecipient / voluntary)
-                         │
-                         ▼ ② CONVERT  stablecoin → FIL (Uniswap v3 on FEVM) + surplus buffer
-                         │
-                         ▼ ③ ROUTE (governance split)
-                            ├─▶ 🔥 BURN          (scarcity, all holders)
-                            ├─▶ 💰 STAKE-YIELD   (real yield to stakers)
-                            └─▶ 🛡 RESERVE        (correlated-tail buffer)
-                         │
-                         ▼ ④ STAKE & BACKSTOP — stake FIL → earn yield + rail access
-                            └ underwrite SP SLA breaches:
-                              loss waterfall = SP bond (1st loss, slashed→client)
-                                             → staker pool (2nd) → reserve (tail)
-                              triggers: PDP faults = parametric auto-pay; retrieval = oracle+dispute
-                         │
-                         ▼ ⑤ MEASURE — public dashboard (burn · staked · APY · coverage)
+    <p>The mechanism is a neutral, open, counterparty-plural <b>public rail</b> on Filecoin Pay's real machinery. It makes paid Filecoin usage accrue to FIL — without skimming anyone's rail, without an insurer, without anything un-shippable:</p>
+    <div class="box verdict"><span class="label">The mechanism</span>Services and processors <b>opt in</b> to route a configurable slice of their paid-storage revenue into a <b>buy-and-burn-from-real-revenue</b> engine (with a Sky-style buffer-first discipline) plus an <b>open stake-yield</b> that gives any FIL holder a real claim on that flow — paired with a <b>FIP</b> to lift a slice to protocol level.</div>
+    <div class="diagram"><pre>PAID REVENUE (USDFC/USDC) ─▶ ① OPT-IN CAPTURE  route a slice (c·R) — any SP / stablecoin / service
+                             │
+                             ▼ ② CONVERT   stablecoin → FIL (Uniswap v3 on FEVM · TWAP/batched · Oku)
+                             │
+                             ▼ ③ SMOOTHING BUFFER (held in stablecoins → target B*)
+                             │     convert + burn run ABOVE the buffer (Sky discipline) — no pro-cyclicality
+                             │
+                             ▼ ④ GOVERNANCE-SET SPLIT
+                             │     ├─▶ 🔥 BURN          (permanent scarcity, all holders)
+                             │     └─▶ 💰 STAKE-YIELD   (open pool; fee-share of real revenue, never emissions)
+                             │
+                             ▼ ⑤ MEASURE   public dashboard + subgraph (capture · burn · staked · APY · % to FIL)
 
-FLYWHEEL: paid usage ↑ → premium ↑ → FIL bought (burn+yield) ↑ → scarcer & yield-bearing →
-          more staked → deeper SLA backstop → better insured service → more paid usage ↻</pre></div>
-    <p><b>Why it's the right Area-4 mechanism:</b> it goes beyond the existing 0.5% burn; it's <b>non-circular</b> (FIL bought with external stablecoin revenue); it has a <b>real adoption logic</b> (providers pay <em>because</em> they sell funded SLAs); it's <b>solvent by construction</b> (bounded payouts, SP-first-loss, correlation-aware capital, reserve tranche — the FIP-0098 "uninsurable" lesson); and it clears every Area-4 exclusion (counterparty-plural, app-layer mainnet v1 + FIP track, structural & automated).</p>
+FLYWHEEL: paid usage ↑ → more revenue routed → FIL bought → burn (scarcity) + stake-yield (a claim on flow)
+          → more FIL staked/held → + a FIP lifts a slice to protocol level → the paid-usage KPI strengthens FIL ↻</pre></div>
+    <p><b>Why it's the right Area-4 mechanism:</b> it goes <b>beyond the existing 0.5% burn</b>; it's <b>non-circular</b> (FIL bought with <em>external</em> stablecoin revenue — the MakerDAO/Sky + Hyperliquid model); it's <b>counterparty-plural via honest opt-in</b> (any SP / stablecoin / service — plurality from breadth of adoption, not skimming someone else's rail); it's <b>operationally simple</b> (a transparent buy-and-burn + open fee-share); and it clears every Area-4 exclusion (counterparty-plural, app-layer mainnet v1 + FIP track, structural & automated). It <b>ships on mainnet in 6 months.</b></p>
   </section>
 
   <section id="p11">
     <span class="parttag">Part XI</span>
     <h2>The economic model</h2>
-    <p class="muted" style="font-size:14px"><b>Note:</b> this is the economic model of the <em>pre-pivot</em> SLA-insurance design. After the red-team (Part XIII) the insurance layer was dropped, and the model simplifies to the leaner one shown there. Kept here to show the reasoning.</p>
-    <p>The premium must price the <b>correlated tail</b> (mass SP failure), not the average fault rate — that's the solvency crux. Illustratively: premium <code>p ≈ 3%</code> of paid revenue, split <b>50% burn / 40% staker yield / 10% reserve</b> (buffer-first). Staking finds equilibrium where yield-implied APY meets stakers' required return: <code>staked FIL = yield ÷ APY</code>.</p>
-    <table>
-      <tr><th>At $100M revenue</th><th>Premium pool</th><th>🔥 Burn/yr</th><th>🔒 FIL staked (8% APY)</th></tr>
-      <tr><td>FVE engine</td><td>$3M</td><td>1.7M FIL</td><td>~17.2M FIL (2.0% of supply)</td></tr>
-      <tr><td>vs today (0.5% only)</td><td>—</td><td>0.58M FIL</td><td>0 staked</td></tr>
-    </table>
-    <p>At $500M, ~86M FIL staked — comparable to the <em>entire</em> current SP pledge. Solvency holds via <code>coverage ≤ gearing × (stake + reserve + SP bonds)</code> with conservative gearing (~1×, not Nexus's 4.8×); you never sell more coverage than capacity. The optimization maximizes <b>FIL captured × volume retained</b> subject to solvency — so early <code>p</code> stays <em>low</em> (nascent demand) and the proposal sells the <b>compounding curve</b>, not a big day-1 take.</p>
-  </section>
-
-  <section id="p12">
-    <span class="parttag">Part XII</span>
-    <h2>The first design's plan</h2>
-    <p class="muted" style="font-size:14px"><b>Note:</b> this is the <em>pre-pivot</em> plan for the SLA-centric design. The adversarial review in Part XIII focused it down to the leaner <b>$240K value-accrual rail</b> described in the executive summary — that focused version is the actual proposal. Kept here to show the journey.</p>
-    <p>A 6-month, milestone-based build (originally requested $300K), shipping a full stacked v1 on mainnet plus a FIP track for the protocol-level slice.</p>
-    <table>
-      <tr><th>Milestone</th><th>Ships</th><th>Payout</th></tr>
-      <tr><td>M1 · Month 2</td><td>Capture + convert + burn on testnet; economic/solvency model + parameter spec</td><td>$90K</td></tr>
-      <tr><td>M2 · Month 4</td><td>Staking + PDP-parametric SLA backstop; audit; public dashboard; FIP draft; capped mainnet</td><td>$110K</td></tr>
-      <tr><td>M3 · Month 6</td><td>Open mainnet; ≥3 opt-in SPs/processors paying premiums → burn + staker yield; live coverage</td><td>$100K</td></tr>
-    </table>
-    <h3>Why Protofire</h3>
-    <ul class="tight">
-      <li><b>Uniswap v3 on FEVM</b> — DAO-approved deployer (the conversion layer).</li>
-      <li><b>Battle-tested liquid staking</b> — Aethir ($20M staked in 90 days), MANTRA (live) — the staking layer.</li>
-      <li><b>Tokenomics + governance/FIP</b> depth for the economic model and FIP track; 41 veToken deployments, $730M TVL driven.</li>
-    </ul>
-    <div class="box warn"><span class="label">…then we stress-tested it</span>This plan looked strong — but we red-teamed it before committing. What we found (next section) sent the SLA-insurance layer to a research track and produced the leaner, sturdier <b>$240K rail</b> that is the actual proposal.</div>
-  </section>
-
-  <section id="p13">
-    <span class="parttag">Part XIII</span>
-    <h2>Red-team — and the pivot that made it fundable</h2>
-    <p>Before committing, we ran an <b>adversarial stress-test</b>: four independent hostile reviews (demand, cryptoeconomics, technical, committee-fit) attacking the funded-SLA design with no charity. They converged on real, fatal flaws — several using <em>our own research</em> against the design:</p>
-    <ul class="tight">
-      <li><b>SP-first-loss isn't enforceable</b> — you can't slash a storage provider's protocol pledge from an app-layer contract; native slashing burns, it doesn't redistribute. Needs a passed FIP.</li>
-      <li><b>Currency mismatch</b> — claims are in dollars, collateral in FIL; the trigger for mass claims <em>is</em> a FIL crash, so coverage collapses exactly when it's needed. Pro-cyclical insolvency.</li>
-      <li><b>Capture isn't a "protocol skim"</b> — it's honestly voluntary opt-in (Filecoin Pay's commission lane belongs to whoever is the operator).</li>
-      <li><b>Burning half the insurance float</b> before reserving against a tail 5–10× the mean is structurally short-vol.</li>
-      <li><b>No funded-SLA demand yet</b> — the buyers who'd want it are nascent on Filecoin.</li>
-    </ul>
-    <div class="box warn"><span class="label">What we did</span>We didn't defend the design — we <b>focused it.</b> We dropped the insurance/underwriting layer to a <em>future research/FIP track</em>, and shipped the part that survives every attack: a neutral <b>value-accrual rail</b> (opt-in capture → convert → Sky-style buffer-first burn held in stablecoins → open stake-yield), counterparty-plural, no currency mismatch, no unenforceable slashing, mainnet-shippable in 6 months at ~$240K. That is the proposal in the executive summary above.</div>
-
-    <h3>The focused economic model</h3>
-    <p>Dropping insurance collapses the model to its essentials — and removes every term the red-team attacked (no correlated tail to price, no solvency/coverage/gearing, no FIL-denominated reserve). What remains:</p>
+    <p>We deliver the mechanism <em>and</em> its economic model — but <b>governance sets the numbers.</b> The structure:</p>
     <div class="diagram"><pre>Captured flow   V = c · R                 (capture rate c × paid revenue R)
-Smoothing buffer (in stablecoins) → target B*  · convert+burn runs ABOVE target
+Smoothing buffer (in stablecoins) → target B*  · convert + burn run ABOVE the target
 Split above buffer:  BURN = b·V → 🔥        STAKE-YIELD = y·V → stakers   (b + y = 1)
 Staking equilibrium: S = (y · c · R) / a   (stakers supply FIL until APY a clears)</pre></div>
-    <p><b>We propose the mechanism — governance sets the numbers.</b> The live values are governance-set (<code>c</code>, split <code>b/y</code>, buffer <code>B*</code>) or market-set (APY <code>a</code>). Proposed ranges: capture <code>c</code> 0.5–4%, split 40–60% each leg, <code>a</code> ~5–12% — working figures <code>c=1%</code>, 50/50, <code>a=8%</code>. The existing hard-coded 0.5% protocol burn proves the network <em>wants</em> this; our rail makes the rate governable, measurable, and FIP-elevatable to protocol level.</p>
+    <p>The live values are <b>governance-set</b> (<code>c</code>, split <code>b/y</code>, buffer <code>B*</code>) or <b>market-set</b> (APY <code>a</code>). Proposed ranges: capture <code>c</code> 0.5–4%, split 40–60% each leg, <code>a</code> ~5–12% — illustrative working figures <code>c=1%</code>, 50/50, <code>a=8%</code>. The existing hard-coded 0.5% protocol burn proves the network <em>wants</em> this; our rail makes the rate governable, measurable, and FIP-elevatable to protocol level.</p>
     <table>
       <tr><th>At working params (c=1%, 50/50, a=8%)</th><th>🔥 Burn/yr</th><th>🔒 FIL staked</th></tr>
       <tr><td>$100M paid revenue</td><td>~575K FIL</td><td>~7.18M FIL (0.82% of supply)</td></tr>
       <tr><td>$500M paid revenue</td><td>~2.87M FIL</td><td>~35.9M FIL (4.1% of supply)</td></tr>
       <tr><td>vs today (0.5% only) @ $100M</td><td>~575K FIL</td><td>0 staked</td></tr>
     </table>
-    <p>A model invariant — <code>locked/burned = y/(a·b)</code> ≈ <b>12.5×</b> at working params — confirms the earlier finding: <b>stake/lock is the dominant value-capture mode; burn is the permanence layer.</b> No solvency constraint (it's a buy-and-burn + fee-share, not an insurer); the only real tradeoff is capture rate vs. opt-in volume retained, so early <code>c</code> stays low and the proposal sells the <b>compounding curve</b>, not a day-1 take.</p>
+    <p>A model invariant — <code>locked/burned = y/(a·b)</code> ≈ <b>12.5×</b> at working params — confirms the worked example: <b>stake/lock is the dominant value-capture mode; burn is the permanence layer.</b> The only real tradeoff is capture rate vs. opt-in volume retained, so early <code>c</code> stays low and the proposal sells the <b>compounding curve</b>, not a day-1 take.</p>
+  </section>
 
-    <p class="muted" style="font-size:14px">The full red-team report and the option comparison (A original · B staking/SLA · C modular · D focused) live in the research notes.</p>
+  <section id="p12">
+    <span class="parttag">Part XII</span>
+    <h2>The plan</h2>
+    <p>A 6-month, milestone-based build — <b>$240,000</b> — shipping the rail on mainnet plus a FIP track for the protocol-level slice.</p>
+    <table>
+      <tr><th>Milestone</th><th>Ships</th><th>Payout</th></tr>
+      <tr><td>M1 · Month 2</td><td>Opt-in capture + convert (Uniswap v3) + buffer-first burn on testnet; economic model + parameter spec (governance-set ranges)</td><td>$75K</td></tr>
+      <tr><td>M2 · Month 4</td><td>Open stake-yield + public dashboard live; external audit; burn engine → mainnet (capped); FIP draft published</td><td>$95K</td></tr>
+      <tr><td>M3 · Month 6</td><td>Mainnet open; ≥3 pilot integrations routing real flow; stake-yield live; governance + runbook</td><td>$70K</td></tr>
+    </table>
+    <h3>Why Protofire</h3>
+    <ul class="tight">
+      <li><b>Uniswap v3 on FEVM</b> — DAO-approved deployer (the conversion layer — our core credential on Filecoin).</li>
+      <li><b>Battle-tested staking</b> — Aethir ($20M staked in 90 days), MANTRA (live) — the stake-yield layer.</li>
+      <li><b>Tokenomics + governance/FIP</b> depth for the economic model and FIP track; 41 veToken deployments, $730M TVL driven.</li>
+      <li><b>Neutral, fee-less position</b> — Protofire takes no privileged fee or stake; all parameters are community-governed.</li>
+    </ul>
   </section>
 
   <section id="conclusion">
     <span class="parttag">Conclusion</span>
     <h2>The through-line</h2>
     <p>Filecoin's 2026 turnaround rests on one unsolved problem: <b>paid demand does not reach FIL.</b> The strategy's objectives are right in spirit but unfocused; the fashionable wedges are narrower than the hype; the network's defensible place is verifiable persistence, not the cloud. The grant program — and the value-capture analysis — converge on the same answer: a mechanism that turns external, stablecoin-denominated paid revenue into FIL value, <em>structurally and non-circularly</em>.</p>
-    <div class="box verdict"><span class="label">The answer</span>The <b>FIL Value Engine</b> — a neutral public rail that buys and burns FIL with real external (stablecoin) revenue and pays FIL stakers a share of the flow, with a FIP to make a slice protocol-level — is the mechanism that makes the entire 2026 strategy actually accrue to the token. Stress-tested, focused, and shippable: it is the rung at the bottom of the ladder, and it is load-bearing.</div>
+    <div class="box verdict"><span class="label">The answer</span>The <b>FIL Value Engine</b> — a neutral public rail that buys and burns FIL with real external (stablecoin) revenue and pays FIL stakers a share of the flow, with a FIP to make a slice protocol-level — is the mechanism that makes the entire 2026 strategy actually accrue to the token. Neutral, focused, and shippable: it is the rung at the bottom of the ladder, and it is load-bearing.</div>
   </section>
 
   </main>
