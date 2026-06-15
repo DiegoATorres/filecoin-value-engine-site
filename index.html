@@ -336,6 +336,17 @@ Staking equilibrium: S = (y · c · R) / a   (stakers supply FIL until APY a cle
       <tr><td>vs today (0.5% only) @ $100M</td><td>~575K FIL</td><td>0 staked</td></tr>
     </table>
     <p>A model invariant — <code>locked/burned = y/(a·b)</code> ≈ <b>12.5×</b> at working params — confirms the worked example: <b>stake/lock is the dominant value-capture mode; burn is the permanence layer.</b> The only real tradeoff is capture rate vs. opt-in volume retained, so early <code>c</code> stays low and the proposal sells the <b>compounding curve</b>, not a day-1 take.</p>
+
+    <h3>Sensitivity to the capture rate <code>c</code></h3>
+    <p>Total FIL burned and staked per year as governance dials the capture rate from 1% to 4% — holding the split at 50/50 and APY at 8%, at a reference <b>$100M</b> of annual paid revenue (both scale linearly with revenue: ×5 at $500M). <code>% of supply</code> uses 875M FIL.</p>
+    <table>
+      <tr><th>Capture rate <code>c</code></th><th>🔥 Total burn / yr</th><th>🔒 Total stake</th></tr>
+      <tr><td><b>1%</b></td><td>~0.57M FIL <span class="muted">(0.07% of supply)</span></td><td>~7.18M FIL <span class="muted">(0.82%)</span></td></tr>
+      <tr><td><b>2%</b></td><td>~1.15M FIL <span class="muted">(0.13%)</span></td><td>~14.4M FIL <span class="muted">(1.64%)</span></td></tr>
+      <tr><td><b>3%</b></td><td>~1.72M FIL <span class="muted">(0.20%)</span></td><td>~21.6M FIL <span class="muted">(2.46%)</span></td></tr>
+      <tr><td><b>4%</b></td><td>~2.30M FIL <span class="muted">(0.26%)</span></td><td>~28.7M FIL <span class="muted">(3.28%)</span></td></tr>
+    </table>
+    <p class="muted" style="font-size:14px">Stake is 12.5× the burn in every row (the <code>y/(a·b)</code> invariant) — capture rate sets the <em>level</em>; the split and APY set the burn-vs-lock mix.</p>
   </section>
 
   <section id="p12">
